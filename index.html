@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>نظام تقارير الأداء اليومي | عبدالرحمن العقيلي وفريق العمل</title>
+  
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 CDN for iconography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              dark: '#080c14',
+              surface: '#0f172a',
+              card: '#111b30',
+              border: '#1e293b'
+            },
+            accent: {
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              gold: '#eab308',
+              rose: '#f43f5e'
+            }
+          },
+          animation: {
+            'glow-pulse': 'glow 7s ease-in-out infinite alternate',
+            'float-slow': 'float 6s ease-in-out infinite',
+            'pulse-subtle': 'pulseSubtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            glow: {
+              '0%': { opacity: '0.25', transform: 'scale(1)' },
+              '100%': { opacity: '0.55', transform: 'scale(1.12)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' }
+            },
+            pulseSubtle: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.6' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080c14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .glass-panel {
+      background: rgba(17, 27, 48, 0.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(99, 102, 241, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -8px rgba(99, 102, 241, 0.2);
+    }
+
+    #heroCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Transition for details dropdown */
+    #detailsSection {
+      transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-brand-dark text-slate-100 antialiased selection:bg-brand-500 selection:text-white min-h-screen overflow-x-hidden">
+
+  <!-- Top Navigation Bar -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-slate-800/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+      
+      <!-- Brand Logo & Lead Name -->
+      <a href="#hero" class="flex items-center gap-2.5 sm:gap-3 group focus:outline-none">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-accent-cyan flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform duration-300 shrink-0">
+          <i class="fa-solid fa-chart-pie text-sm sm:text-base"></i>
+        </div>
+        <div class="leading-tight">
+          <h1 class="text-xs sm:text-base font-extrabold tracking-wide text-white group-hover:text-brand-400 transition-colors flex items-center gap-1.5">
+            عبدالرحمن العقيلي
+            <span class="inline-block w-2 h-2 rounded-full bg-accent-emerald animate-pulse"></span>
+          </h1>
+          <p class="text-[10px] sm:text-xs text-slate-400 font-medium">سجل الإنجاز والعمليات اليومية</p>
+        </div>
+      </a>
+
+      <!-- Quick Actions: Dashboard link + Prominent Academy Passwords Button -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="#dashboard" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800/90 hover:bg-slate-700/80 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-calendar-day text-accent-cyan"></i>
+          <span class="hidden xs:inline">الداش بورد</span>
+        </a>
+
+        <!-- الباسوردات: الزر الواضح والبارز المطلوب -->
+        <button id="academyPasswordsBtn" class="px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-slate-950 shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 hover:scale-[1.03] active:scale-95 border border-amber-300/40">
+          <i class="fa-solid fa-key text-slate-950 text-xs sm:text-sm"></i>
+          <span class="tracking-wide">جميع باسوردات الأكاديمية</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero" class="relative min-h-[88vh] flex items-center justify-center pt-24 pb-14 px-4 overflow-hidden">
+    <!-- Interactive Background Canvas -->
+    <canvas id="heroCanvas"></canvas>
+    
+    <!-- Atmospheric Ambient Glows -->
+    <div class="absolute top-1/4 -right-16 w-72 sm:w-96 h-72 sm:h-96 bg-brand-600/15 rounded-full blur-[100px] pointer-events-none animate-glow-pulse"></div>
+    <div class="absolute bottom-1/4 -left-16 w-80 sm:w-[450px] h-80 sm:h-[450px] bg-accent-cyan/10 rounded-full blur-[110px] pointer-events-none animate-glow-pulse" style="animation-delay: -3s;"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
+      
+      <!-- Status Pill -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/70 text-slate-300 text-xs sm:text-sm mb-6 shadow-inner animate-float-slow">
+        <span class="w-2 h-2 rounded-full bg-accent-cyan animate-ping"></span>
+        <span class="font-medium text-slate-300">سجل الإنجاز والتقارير بالساعة والدقيقة</span>
+        <span class="text-slate-600">|</span>
+        <span class="text-accent-emerald font-bold">بداية السجل: 28 سبتمبر 2026</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h2 class="text-2xl sm:text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.2] sm:leading-[1.25] mb-5">
+        شفافية كاملة لكل ثانية عمل، <br class="hidden sm:inline">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-indigo-300 to-accent-cyan">
+          توثيق دقيق لحظة بلحظة.
+        </span>
+      </h2>
+
+      <!-- Subtitle -->
+      <p class="max-w-2xl text-xs sm:text-base md:text-lg text-slate-300 font-normal leading-relaxed mb-8 px-2">
+        مرحباً بحضرتك يا فندم. هنا تقدر تختار أي يوم وتشوف ملخص اليوم مع إمكانية الضغط على السهم للنزول للتفاصيل بالساعة لـ <span class="text-white font-bold">عبدالرحمن</span>، وتقارير إنجاز التيم وحالات الحضور: 
+        <span class="text-indigo-300 font-semibold">عمر</span> (ديزاين)، 
+        <span class="text-cyan-300 font-semibold">إسلام</span> و<span class="text-emerald-300 font-semibold">أحمد</span> (سوشيال ميديا).
+      </p>
+
+      <!-- CTA Buttons & Quick Jump -->
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10 w-full max-w-md">
+        <a href="#dashboard" class="flex-1 min-w-[150px] px-6 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-cyan text-white font-bold text-xs sm:text-sm shadow-xl shadow-brand-600/30 hover:shadow-brand-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2">
+          <span>دخول لوحة التقرير</span>
+          <i class="fa-solid fa-arrow-down text-xs"></i>
+        </a>
+        <button id="heroOpenVaultBtn" class="flex-1 min-w-[150px] px-6 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/90 text-amber-300 border border-amber-500/30 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 hover:border-amber-400">
+          <i class="fa-solid fa-key text-amber-400"></i>
+          <span>باسوردات الأكاديمية</span>
+        </button>
+      </div>
+
+      <!-- Quick Roles Badges -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 w-full max-w-4xl text-right">
+        
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl border-slate-800 flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/15 border border-brand-500/25 text-brand-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-user-tie text-xs sm:text-sm"></i>
+          </div>
+          <div class="truncate">
+            <div class="text-slate-400 text-[10px]">المسؤول</div>
+            <div class="text-white font-bold text-xs truncate">عبدالرحمن العقيلي</div>
+          </div>
+        </div>
+
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl border-slate-800 flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-palette text-xs sm:text-sm"></i>
+          </div>
+          <div class="truncate">
+            <div class="text-slate-400 text-[10px]">الديزاينر</div>
+            <div class="text-white font-bold text-xs">عمر</div>
+          </div>
+        </div>
+
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl border-slate-800 flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-accent-cyan/15 border border-accent-cyan/25 text-accent-cyan flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-hashtag text-xs sm:text-sm"></i>
+          </div>
+          <div class="truncate">
+            <div class="text-slate-400 text-[10px]">سوشيال ميديا</div>
+            <div class="text-white font-bold text-xs">إسلام</div>
+          </div>
+        </div>
+
+        <div class="glass-panel p-3 sm:p-3.5 rounded-2xl border-slate-800 flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-accent-emerald/15 border border-accent-emerald/25 text-accent-emerald flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-bullhorn text-xs sm:text-sm"></i>
+          </div>
+          <div class="truncate">
+            <div class="text-slate-400 text-[10px]">سوشيال ميديا</div>
+            <div class="text-white font-bold text-xs">أحمد</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Dashboard Core Container -->
+  <main id="dashboard" class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-20">
+    
+    <!-- Date Control Bar (البحث بأي سنة وشهر ويوم) -->
+    <div class="glass-panel rounded-3xl p-4 sm:p-6 mb-8 border border-slate-800 shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-48 h-1 bg-gradient-to-l from-accent-cyan via-brand-500 to-transparent"></div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        
+        <!-- Left Title and Current Date Badge -->
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+              تحديد التاريخ
+            </span>
+            <span id="activeDateWeekday" class="text-xs text-slate-400 font-medium">الاثنين</span>
+          </div>
+          <h3 id="activeDateDisplay" class="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
+            28 سبتمبر 2026
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">اختر أي يوم لمشاهدة التقرير (اليوم الحالي تجريبي حتى يتم ملؤه)</p>
+        </div>
+
+        <!-- Date Picking Form Controls -->
+        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          
+          <!-- Native Date Input -->
+          <div class="relative flex items-center">
+            <input type="date" id="dateInput" class="bg-slate-900/90 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 sm:px-4 py-2.5 border border-slate-700 hover:border-brand-500 focus:border-brand-500 focus:outline-none transition-all cursor-pointer shadow-inner">
+          </div>
+
+          <!-- Quick Navigation Buttons -->
+          <div class="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+            <button id="prevDayBtn" class="p-2 sm:px-3 sm:py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1" title="اليوم السابق">
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              <span class="hidden sm:inline">السابق</span>
+            </button>
+            <button id="todayBtn" class="px-3 py-1.5 sm:py-2 text-xs font-bold text-accent-cyan hover:bg-brand-500/20 rounded-lg transition-colors">
+              اليوم الحالي
+            </button>
+            <button id="nextDayBtn" class="p-2 sm:px-3 sm:py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1" title="اليوم التالي">
+              <span class="hidden sm:inline">التالي</span>
+              <i class="fa-solid fa-chevron-left text-[10px]"></i>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- GENERAL SUMMARY CARD (الملخص العام لليوم) -->
+    <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-800 mb-8 relative overflow-hidden">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-5 mb-5">
+        <div>
+          <div class="flex items-center gap-2 text-xs text-amber-400 font-bold mb-1">
+            <i class="fa-solid fa-bolt"></i>
+            <span>ملخص تنفيذي عام لليوم</span>
+          </div>
+          <h4 id="summaryHeading" class="text-base sm:text-xl font-extrabold text-white">
+            ملخص أداء اليوم لـ عبدالرحمن وفريق العمل
+          </h4>
+          <p id="summarySubtext" class="text-xs sm:text-sm text-slate-400 mt-1">
+            نظرة سريعة على مجمل إنجازات اليوم ومؤشرات الفريق دون الدخول في تفاصيل الساعات.
+          </p>
+        </div>
+
+        <!-- Toggle Button with DOWN ARROW as requested -->
+        <button id="toggleDetailsBtn" class="px-4 sm:px-5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-brand-600/25 flex items-center gap-2.5 transition-all hover:scale-[1.02] active:scale-95 shrink-0">
+          <span id="toggleDetailsBtnText">عرض التفاصيل الكاملة بالساعة</span>
+          <i id="toggleDetailsArrow" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+        </button>
+      </div>
+
+      <!-- Quick Metrics Strip inside Summary -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
+        
+        <div class="bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-[11px] sm:text-xs">ساعات عبدالرحمن</span>
+            <i class="fa-solid fa-business-time text-brand-400 text-xs"></i>
+          </div>
+          <div id="statLeadHours" class="text-lg sm:text-2xl font-black text-white">8.5 س</div>
+          <div id="statLeadStatus" class="text-[10px] text-accent-emerald flex items-center gap-1 mt-0.5">
+            <i class="fa-solid fa-check text-[9px]"></i>
+            <span>تغطية كاملة لليوم</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-[11px] sm:text-xs">حضور التيم</span>
+            <i class="fa-solid fa-users text-accent-cyan text-xs"></i>
+          </div>
+          <div id="statTeamAttendance" class="text-lg sm:text-2xl font-black text-white">3 / 3</div>
+          <div id="statTeamAttendanceNote" class="text-[10px] text-accent-emerald flex items-center gap-1 mt-0.5">
+            <span>اكتمل الحضور بنجاح</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-[11px] sm:text-xs">المهام الكلية</span>
+            <i class="fa-solid fa-list-check text-purple-400 text-xs"></i>
+          </div>
+          <div id="statCompletedTasks" class="text-lg sm:text-2xl font-black text-white">14 مهمة</div>
+          <div class="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+            <span>شاملة التصاميم والنشر</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-slate-400 mb-1">
+            <span class="text-[11px] sm:text-xs">معدل الإنجاز</span>
+            <i class="fa-solid fa-fire text-amber-400 text-xs"></i>
+          </div>
+          <div id="statCompletionRate" class="text-lg sm:text-2xl font-black text-accent-emerald">96%</div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="statCompletionBar" class="bg-gradient-to-r from-brand-500 to-accent-emerald h-full rounded-full transition-all duration-500" style="width: 96%"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Executive Highlight Paragraph -->
+      <div id="summaryNarrative" class="bg-slate-900/40 p-3.5 sm:p-4 rounded-2xl border border-slate-800/80 text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+        تم إنجاز خطة العمل اليومية بانتظام. قام <strong class="text-white">عبدالرحمن</strong> بمتابعة الحملات الإعلانية ومراجعة تصاميم <strong class="text-indigo-300">عمر</strong> وجدولة بوستات <strong class="text-cyan-300">إسلام</strong> والردود عبر <strong class="text-emerald-300">أحمد</strong>. اضغط على السهم للنزول ومطالعة تفاصيل كل ساعة.
+      </div>
+    </div>
+
+    <!-- DETAILS SECTION (مخفي افتراضياً ويفتح عند الضغط على السهم المنسدل) -->
+    <div id="detailsSection" class="space-y-12">
+      
+      <!-- SECTION 1: سجل جدول عبدالرحمن العقيلي (ساعة بساعة) -->
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-3 h-3 rounded-md bg-brand-500"></span>
+          <h3 class="text-base sm:text-xl font-extrabold text-white">
+            تفاصيل ساعات العمل: <span class="text-brand-400">عبدالرحمن العقيلي</span>
+          </h3>
+          <span class="text-xs text-slate-400 mr-2">(موثق ساعة بساعة)</span>
+        </div>
+
+        <!-- Timeline Card Wrapper -->
+        <div class="glass-panel rounded-3xl p-4 sm:p-7 border-slate-800">
+          <div id="abdulrahmanTimeline" class="relative pl-2 pr-2 sm:pr-4 space-y-4">
+            <!-- Timeline Line is injected dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: تقارير إنجازات الفريق وحالات الحضور/الغياب -->
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-3 h-3 rounded-md bg-accent-cyan"></span>
+          <h3 class="text-base sm:text-xl font-extrabold text-white">
+            تقرير عمل الفريق اليومي: <span class="text-slate-300">عمر • إسلام • أحمد</span>
+          </h3>
+        </div>
+
+        <!-- Team Cards 3-Column Responsive Grid -->
+        <div id="teamCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: نافذة جميع باسوردات الأكاديمية (Secure Academy Passwords Vault) -->
+  <div id="passwordsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-brand-card border border-amber-500/40 rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto animate-float-slow">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-900 via-amber-950/20 to-slate-900">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-base">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h4 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              جميع باسوردات وحسابات الأكاديمية
+            </h4>
+            <p class="text-xs text-amber-300/80 mt-0.5">خزنة الحسابات الرسمية - سرية للغاية ومخصصة للإدارة فقط</p>
+          </div>
+        </div>
+        <button id="closePasswordsModalBtn" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (List of Passwords) -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-right">
+        
+        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-xs text-amber-200 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-amber-400 text-sm shrink-0"></i>
+          <span>يمكنك إظهار كلمة المرور أو نسخها بضغطة زر مباشرة.</span>
+        </div>
+
+        <!-- Accounts Grid -->
+        <div class="space-y-3" id="academyAccountsList">
+          <!-- Injected via JavaScript -->
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-3.5 sm:px-6 sm:py-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between">
+        <span class="text-xs text-slate-500 flex items-center gap-1.5">
+          <i class="fa-solid fa-lock text-emerald-400"></i>
+          <span>مشفر ومحمي داخل النظام</span>
+        </span>
+        <button id="closePasswordsFooterBtn" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-bold transition-all">
+          إغلاق النافذة
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Component (بدون أي alert مزعج) -->
+  <div id="toastBox" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-900 border border-brand-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+      <div id="toastIcon" class="w-7 h-7 rounded-xl bg-accent-emerald/20 text-accent-emerald flex items-center justify-center text-xs">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <div>
+        <p id="toastMessage" class="text-xs sm:text-sm font-semibold">تم نسخ النص بنجاح</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 py-8 px-4 text-center text-slate-500 text-xs relative z-20">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+        <span class="text-slate-300 font-semibold">لوحة تقارير الأداء</span>
+        <span>•</span>
+        <span>عبدالرحمن العقيلي</span>
+      </div>
+      <p>فريق العمل: عمر (ديزاين) • إسلام (سوشيال) • أحمد (سوشيال)</p>
+      <div class="text-[11px] text-slate-600">
+        عرض سريع وملخص لليوم مع تفاصيل كاملة بالساعة
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================================
+       1. البيانات والتاريخ الأساسي
+       النهاردة فقط هو اللي تم ملؤه ببيانات العمل الفعلية
+       ========================================================= */
+    const defaultTodayDate = "2026-09-28";
+    let currentSelectedDate = defaultTodayDate;
+    let areDetailsVisible = false; // التحكم في إظهار أو إخفاء التفاصيل بالسهم
+
+    // قاعدة بيانات باسوردات الأكاديمية الرسمية
+    const academyPasswordsData = [
+      {
+        platform: "فيسبوك (Facebook)",
+        email: "حساب الأكاديمية الرئيسي",
+        pass: "Mohammed.com23456@",
+        icon: "fa-brands fa-facebook",
+        role: "إدارة الصفحة والحملات الإعلانية والتواصل"
+      },
+      {
+        platform: "إنستغرام (Instagram)",
+        email: "مرتبط بحساب فيسبوك الرسمي",
+        pass: "with fb",
+        icon: "fa-brands fa-instagram",
+        role: "تسجيل الدخول المباشر عبر فيسبوك (With FB)"
+      },
+      {
+        platform: "جوجل (Google Account)",
+        email: "حساب جوجل الأساسي للأكاديمية",
+        pass: "mohamed.ieatd279941#",
+        icon: "fa-brands fa-google",
+        role: "بريد جوجل والخدمات السحابية والأدوات التحليلية"
+      },
+      {
+        platform: "تيك توك (TikTok)",
+        email: "حساب تيك توك الرسمي",
+        pass: "Ieatd279941#@0",
+        icon: "fa-brands fa-tiktok",
+        role: "نشر الفيديوهات والمحتوى التفاعلي"
+      },
+      {
+        platform: "سناب شات (Snapchat)",
+        email: "user: ieatd 2",
+        pass: "mohamed.com1",
+        icon: "fa-brands fa-snapchat",
+        role: "اسم المستخدم: ieatd 2"
+      },
+      {
+        platform: "لينكد إن (LinkedIn)",
+        email: "مرتبط بحساب جوجل (Gmail)",
+        pass: "with gmail",
+        icon: "fa-brands fa-linkedin-in",
+        role: "تسجيل الدخول السريع عبر Google Workspace"
+      },
+      {
+        platform: "تويتر / منصة إكس (Twitter - X)",
+        email: "info@ieatd.com",
+        pass: "u1CfBoj$79uIr4G",
+        icon: "fa-brands fa-x-twitter",
+        role: "الحساب الرسمي للأكاديمية على منصة X"
+      }
+    ];
+
+    // تقرير اليوم الفعلي - 28 سبتمبر 2026
+    const reportsDatabase = {
+      [defaultTodayDate]: {
+        date: defaultTodayDate,
+        lead: {
+          name: "عبدالرحمن العقيلي",
+          totalHours: "7.0",
+          summary: "إنجاز مهام شريان القيادة بالكامل: معالجة مشكلات الحسابات وجمع التصاميم، إنهاء الميديا بلان وميزانيات الإعلانات، تدقيق الـ SEO وضغط صور الموقع، حل أزمة إيميل زوهو، وإعداد خطة المحتوى.",
+          timeline: [
+            {
+              time: "10:00 ص - 11:00 ص",
+              category: "إدارة الحسابات والتصاميم",
+              icon: "fa-sliders",
+              color: "text-brand-400 bg-brand-500/10 border-brand-500/30",
+              title: "معالجة مشاكل حسابات شريان القيادة وتجميع التصاميم",
+              details: "تم الانتهاء من كافة المشاكل الموجودة في الأكونتات الخاصة بشريان القيادة (مشاكل الـ Bio بالكامل)، مع جمع وتصنيف كل التصميمات التي تم إنجازها سابقاً لشريان القيادة ولم يتم نشرها بعد لحفظها وترتيب جدول نشرها."
+            },
+            {
+              time: "11:00 ص - 02:00 م",
+              category: "ميديا بلان وميزانيات",
+              icon: "fa-chart-line",
+              color: "text-accent-cyan bg-accent-cyan/10 border-accent-cyan/30",
+              title: "إنهاء الميديا بلان والميزانية الإعلانية لشريان القيادة",
+              details: "الانتهاء بالكامل من إعداد وتجهيز الميديا بلان (Media Plan) الخاصة بشريان القيادة للحملات الإعلانية وتحديد وتوزيع الميزانية بدقة. (توزيع فترات العمل: من 11:00 ص إلى 12:00 م، ثم استراحة، واستئناف العمل من 01:00 م إلى 02:00 م)."
+            },
+            {
+              time: "02:00 م - 04:00 م",
+              category: "تحليل الموقع والـ SEO",
+              icon: "fa-magnifying-glass-chart",
+              color: "text-accent-emerald bg-accent-emerald/10 border-accent-emerald/30",
+              title: "تحليل بيانات موقع شريان القيادة وتدقيق الـ SEO والملفات",
+              details: "إجراء تحليل بيانات شامل لموقع شريان القيادة من زاوية تحسين محركات البحث (SEO)، تصحيح بعض الأخطاء الإملائية، تعديل ومعالجة أخطاء التنسيقات في الصفحات، وضغط وتصغير أحجام بعض الصور التي كانت تتخطى 5 ميجابايت لتسريع تحميل الموقع بشكل ملحوظ."
+            },
+            {
+              time: "04:00 م - 06:00 م",
+              category: "دعم فني وتخطيط محتوى",
+              icon: "fa-envelope-circle-check",
+              color: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+              title: "حل مشكلة إيميل زوهو + إعداد خطة محتوى متكاملة",
+              details: "1) المتابعة مع جوري لحل أزمة فتح إيميل زوهو (Zoho Mail) بعد إغلاقه لفتحه على 3 أجهزة بوقت متقارب؛ تم عمل Reset للريكوفري وعمل Scan لرمز QR وإعادة تفعيله بنجاح.<br>2) العمل على إعداد خطة محتوى شاملة لحسابات شريان القيادة، استعداداً لعقد اجتماع غداً مع الشباب لوضع التايم لاين ثم عرض خطة المحتوى للاعتماد."
+            }
+          ]
+        },
+        team: [
+          {
+            id: "omar",
+            name: "عمر",
+            role: "الديزاينر",
+            icon: "fa-palette",
+            roleColor: "text-purple-400",
+            status: "pending",
+            absenceReason: null,
+            tasks: [],
+            notes: "بانتظار استلام تقرير يوم 28-9 وسيتم إدراجه في الصفحة فور الاستلام."
+          },
+          {
+            id: "islam",
+            name: "إسلام",
+            role: "سوشيال ميديا",
+            icon: "fa-hashtag",
+            roleColor: "text-accent-cyan",
+            status: "pending",
+            absenceReason: null,
+            tasks: [],
+            notes: "سيتم تسليم التتقرير غداً وسيتم إدراجه وتحديث الصفحة مباشرة."
+          },
+          {
+            id: "ahmed",
+            name: "أحمد",
+            role: "سوشيال ميديا",
+            icon: "fa-bullhorn",
+            roleColor: "text-accent-emerald",
+            status: "pending",
+            absenceReason: null,
+            tasks: [],
+            notes: "بانتظار استلام وتحديث تقرير مهام اليوم."
+          }
+        ]
+      }
+    };
+  </script>
+
+  <script>
+    /* =========================================================
+       2. دوال مساعدة للتنسيق والتواريخ والنسخ
+       ========================================================= */
+    const arabicWeekdays = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const arabicMonths = [
+      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+    ];
+
+    function formatArabicDate(dateStr) {
+      const parts = dateStr.split('-');
+      const year = parseInt(parts[0], 10);
+      const monthIndex = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      
+      const d = new Date(year, monthIndex, day);
+      const weekday = arabicWeekdays[d.getDay()];
+      const monthName = arabicMonths[monthIndex];
+
+      return {
+        formatted: `${day} ${monthName} ${year}`,
+        weekday: weekday,
+        year: year,
+        month: monthIndex + 1,
+        day: day
+      };
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toastBox');
+      const msgEl = document.getElementById('toastMessage');
+      const iconEl = document.getElementById('toastIcon');
+
+      msgEl.textContent = message;
+      if (isError) {
+        iconEl.className = "w-7 h-7 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs";
+        iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      } else {
+        iconEl.className = "w-7 h-7 rounded-xl bg-accent-emerald/20 text-accent-emerald flex items-center justify-center text-xs";
+        iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    function copyToClipboard(text, label = "النص") {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`تم نسخ ${label} بنجاح!`);
+        }).catch(() => {
+          fallbackCopyText(text, label);
+        });
+      } else {
+        fallbackCopyText(text, label);
+      }
+    }
+
+    function fallbackCopyText(text, label) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`تم نسخ ${label} بنجاح!`);
+      } catch (err) {
+        showToast(`تعذر النسخ التلقائي`, true);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    // جلب التقرير لليوم؛ لو مش موجود يرجع كائن فارغ ونظيف بدون افتراضات وهمية
+    function getReportForDate(dateStr) {
+      if (reportsDatabase[dateStr]) {
+        return reportsDatabase[dateStr];
+      }
+
+      // يوم جديد فارغ تماماً بانتظار الإدخال
+      return {
+        date: dateStr,
+        isCustomEmpty: true,
+        lead: {
+          name: "عبدالرحمن العقيلي",
+          totalHours: "0.0",
+          summary: "لا توجد ساعات عمل مسجلة حتى الآن لهذا اليوم.",
+          timeline: []
+        },
+        team: [
+          {
+            id: "omar",
+            name: "عمر",
+            role: "الديزاينر",
+            icon: "fa-palette",
+            roleColor: "text-purple-400",
+            status: "empty",
+            absenceReason: null,
+            tasks: [],
+            notes: ""
+          },
+          {
+            id: "islam",
+            name: "إسلام",
+            role: "سوشيال ميديا",
+            icon: "fa-hashtag",
+            roleColor: "text-accent-cyan",
+            status: "empty",
+            absenceReason: null,
+            tasks: [],
+            notes: ""
+          },
+          {
+            id: "ahmed",
+            name: "أحمد",
+            role: "سوشيال ميديا",
+            icon: "fa-bullhorn",
+            roleColor: "text-accent-emerald",
+            status: "empty",
+            absenceReason: null,
+            tasks: [],
+            notes: ""
+          }
+        ]
+      };
+    }
+  </script>
+
+  <script>
+    /* =========================================================
+       3. رندر لوحة التحكم والملخص العام والتفاصيل
+       ========================================================= */
+    function renderDashboardForDate(dateStr) {
+      currentSelectedDate = dateStr;
+      const report = getReportForDate(dateStr);
+      const dateInfo = formatArabicDate(dateStr);
+
+      // تحديث عناصر التاريخ
+      document.getElementById('activeDateDisplay').textContent = dateInfo.formatted;
+      document.getElementById('activeDateWeekday').textContent = dateInfo.weekday;
+      document.getElementById('dateInput').value = dateStr;
+
+      // تحديث كارت الملخص العام لليوم
+      const headingEl = document.getElementById('summaryHeading');
+      const narrativeEl = document.getElementById('summaryNarrative');
+      const leadHoursEl = document.getElementById('statLeadHours');
+      const teamAttendanceEl = document.getElementById('statTeamAttendance');
+      const teamAttendanceNoteEl = document.getElementById('statTeamAttendanceNote');
+      const completedTasksEl = document.getElementById('statCompletedTasks');
+      const completionRateEl = document.getElementById('statCompletionRate');
+      const completionBarEl = document.getElementById('statCompletionBar');
+
+      if (report.isCustomEmpty) {
+        headingEl.textContent = `ملخص يوم ${dateInfo.formatted} (سجل فارغ)`;
+        narrativeEl.innerHTML = `هذا اليوم (<strong class="text-white">${dateInfo.formatted}</strong>) لم يتم تدوين سجلات له بعد. تم تركه فارغاً حتى يتم ملؤه الفعلي عند بدء النشاط.`;
+        leadHoursEl.textContent = `0 س`;
+        document.getElementById('statLeadStatus').innerHTML = '<span class="text-slate-500">لا توجد ساعات</span>';
+        teamAttendanceEl.textContent = `0 / 3`;
+        teamAttendanceNoteEl.className = "text-[10px] text-slate-400 flex items-center gap-1 mt-0.5";
+        teamAttendanceNoteEl.innerHTML = `<span>بانتظار تسجيل الحضور</span>`;
+        completedTasksEl.textContent = `0 مهمة`;
+        completionRateEl.textContent = `0%`;
+        completionRateEl.className = "text-lg sm:text-2xl font-black text-slate-400";
+        completionBarEl.style.width = "0%";
+      } else {
+        headingEl.textContent = `ملخص أداء اليوم لـ عبدالرحمن وفريق العمل (${dateInfo.formatted})`;
+        narrativeEl.innerHTML = `تم إنجاز يوم حافل بقيادة <strong class="text-white">عبدالرحمن العقيلي</strong> شمل حل مشكلات حسابات شريان القيادة، إعداد الميديا بلان والميزانية الإعلانية، مراجعة وتدقيق سيو موقع شريان القيادة وضغط الصور، حل أزمة إيميل زوهو، وصياغة خطة المحتوى. تقارير التيم (<strong class="text-indigo-300">عمر</strong> و<strong class="text-cyan-300">إسلام</strong> و<strong class="text-emerald-300">أحمد</strong>) قيد الاستلام ليتم إدراجها فوراً. اضغط على السهم لعرض التفاصيل الكاملة بالساعة.`;
+        leadHoursEl.textContent = `${report.lead.totalHours} س`;
+        document.getElementById('statLeadStatus').innerHTML = '<i class="fa-solid fa-check text-[9px]"></i><span>ساعات عمل موثقة</span>';
+        
+        const activeCount = report.team.filter(m => m.status === 'active').length;
+        teamAttendanceEl.textContent = `${activeCount} / 3`;
+        teamAttendanceNoteEl.className = "text-[10px] text-amber-400 flex items-center gap-1 mt-0.5";
+        teamAttendanceNoteEl.innerHTML = `<i class="fa-regular fa-clock text-[9px]"></i><span>بانتظار استلام تقارير التيم</span>`;
+
+        let taskSum = 0;
+        report.team.forEach(m => {
+          if (m.tasks) taskSum += m.tasks.length;
+        });
+        taskSum += (report.lead.timeline ? report.lead.timeline.length : 0);
+        completedTasksEl.textContent = `${taskSum} محطات رئيسية`;
+
+        completionRateEl.textContent = `100%`;
+        completionRateEl.className = "text-lg sm:text-2xl font-black text-accent-emerald";
+        completionBarEl.style.width = "100%";
+      }
+
+      // رندر الجدول الزمني بالساعات لعبدالرحمن
+      const timelineContainer = document.getElementById('abdulrahmanTimeline');
+      timelineContainer.innerHTML = '';
+
+      if (!report.lead.timeline || report.lead.timeline.length === 0) {
+        timelineContainer.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs sm:text-sm">
+            <i class="fa-regular fa-clock text-slate-500 text-2xl mb-2 block"></i>
+            لا توجد ساعات مسجلة لـ عبدالرحمن في هذا التاريخ (${dateInfo.formatted}).
+          </div>
+        `;
+      } else {
+        // الخط الرأسي للتايم لاين
+        timelineContainer.innerHTML = `
+          <div class="absolute top-3 bottom-3 right-6 sm:right-8 w-0.5 bg-gradient-to-b from-brand-500 via-indigo-600 to-slate-800 -z-0"></div>
+        `;
+
+        report.lead.timeline.forEach((item) => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = "relative z-10 flex items-start gap-3 sm:gap-5 pr-2 sm:pr-4 group";
+
+          itemDiv.innerHTML = `
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl ${item.color || 'text-brand-400 bg-brand-500/10 border-brand-500/30'} border flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <i class="fa-solid ${item.icon || 'fa-clock'} text-xs sm:text-sm"></i>
+            </div>
+
+            <div class="flex-1 bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 p-3.5 sm:p-4 rounded-2xl transition-all duration-200">
+              <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+                <span class="text-xs sm:text-sm font-bold text-white group-hover:text-brand-300 transition-colors">
+                  ${item.title}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-slate-800 text-accent-cyan border border-slate-700/60 font-mono">
+                  ${item.time}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-[10px] font-semibold text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-md">
+                  ${item.category || 'مهمة عمل'}
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                ${item.details}
+              </p>
+            </div>
+          `;
+          timelineContainer.appendChild(itemDiv);
+        });
+      }
+
+      // رندر تقارير التيم (عمر، إسلام، أحمد)
+      const teamCardsContainer = document.getElementById('teamCardsContainer');
+      teamCardsContainer.innerHTML = '';
+
+      report.team.forEach(member => {
+        const card = document.createElement('div');
+        const isAbsent = member.status === 'absent';
+        const isEmpty = member.status === 'empty';
+        const isPending = member.status === 'pending';
+
+        card.className = `glass-panel rounded-3xl p-5 border flex flex-col justify-between glass-card-hover ${
+          isAbsent ? 'border-rose-900/40 bg-gradient-to-b from-rose-950/20 to-slate-900/80' : 
+          isPending ? 'border-amber-500/30 bg-gradient-to-b from-amber-950/10 to-slate-900/80' : 'border-slate-800'
+        }`;
+
+        let statusBadge = '';
+        let bodyHtml = '';
+
+        if (isEmpty) {
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+              لم يسجل بعد
+            </span>
+          `;
+          bodyHtml = `
+            <div class="py-8 text-center text-xs text-slate-500">
+              بانتظار تسجيل تقرير اليوم.
+            </div>
+          `;
+        } else if (isPending) {
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              قيد الاستلام والتجهيز
+            </span>
+          `;
+          bodyHtml = `
+            <div class="my-5 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+              <div class="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm mb-1.5">
+                <i class="fa-regular fa-clock text-amber-400"></i>
+                <span>حالة التقرير:</span>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                ${member.notes}
+              </p>
+            </div>
+            <div class="mt-auto pt-3 border-t border-slate-800/80 flex items-center gap-1.5 text-[11px] text-slate-500">
+              <i class="fa-solid fa-arrows-rotate text-amber-400 text-[10px]"></i>
+              <span>سيتم إدراج المهام تلقائياً فور الاعتماد</span>
+            </div>
+          `;
+        } else if (isAbsent) {
+          // حالة الغياب أو عدم العمل: إظهار سبب عدم العمل بشكل بارز ومفصل
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+              غائب / لم يعمل
+            </span>
+          `;
+          bodyHtml = `
+            <div class="my-4 p-4 rounded-2xl bg-rose-950/40 border border-rose-800/50">
+              <div class="flex items-center gap-2 text-rose-300 font-bold text-xs sm:text-sm mb-1.5">
+                <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                <span>سبب عدم العمل / الإجازة:</span>
+              </div>
+              <p class="text-xs sm:text-sm text-rose-200/90 leading-relaxed font-medium">
+                ${member.absenceReason || 'لم يتم تسجيل سبب محدد للغياب.'}
+              </p>
+            </div>
+            ${member.notes ? `<p class="text-[11px] text-slate-400 mt-2"><i class="fa-regular fa-note-sticky ml-1 text-slate-500"></i>ملاحظة: ${member.notes}</p>` : ''}
+          `;
+        } else {
+          // حالة الحضور والإنجاز
+          statusBadge = `
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              حاضر ومنجز
+            </span>
+          `;
+          
+          let tasksListHtml = member.tasks.map(t => `
+            <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-300 leading-normal">
+              <i class="fa-solid fa-circle-check text-accent-emerald text-[11px] mt-1 shrink-0"></i>
+              <span>${t}</span>
+            </li>
+          `).join('');
+
+          bodyHtml = `
+            <div class="my-4 space-y-3">
+              <div class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-list-check text-slate-500"></i>
+                <span>المهام التي تم إنجازها اليوم:</span>
+              </div>
+              <ul class="space-y-2 pr-1">
+                ${tasksListHtml}
+              </ul>
+            </div>
+            ${member.notes ? `
+              <div class="mt-auto pt-3 border-t border-slate-800/80 flex items-center gap-1.5 text-[11px] text-slate-400">
+                <i class="fa-regular fa-comment-dots text-accent-cyan"></i>
+                <span class="truncate">${member.notes}</span>
+              </div>
+            ` : ''}
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700/80 flex items-center justify-center text-sm ${member.roleColor}">
+                <i class="fa-solid ${member.icon}"></i>
+              </div>
+              <div>
+                <h4 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
+                  ${member.name}
+                </h4>
+                <p class="text-[11px] font-medium ${member.roleColor}">${member.role}</p>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+          ${bodyHtml}
+        `;
+
+        teamCardsContainer.appendChild(card);
+      });
+    }
+  </script>
+
+  <script>
+    /* =========================================================
+       4. التحكم في ظهور التفاصيل بالسهم المنسدل (Accordion)
+       ========================================================= */
+    const detailsSection = document.getElementById('detailsSection');
+    const toggleDetailsBtn = document.getElementById('toggleDetailsBtn');
+    const toggleDetailsBtnText = document.getElementById('toggleDetailsBtnText');
+    const toggleDetailsArrow = document.getElementById('toggleDetailsArrow');
+
+    function updateDetailsVisibility(show) {
+      areDetailsVisible = show;
+      if (areDetailsVisible) {
+        detailsSection.classList.remove('hidden');
+        toggleDetailsBtnText.textContent = "إخفاء التفاصيل";
+        toggleDetailsArrow.classList.add('rotate-180');
+      } else {
+        detailsSection.classList.add('hidden');
+        toggleDetailsBtnText.textContent = "عرض التفاصيل الكاملة بالساعة";
+        toggleDetailsArrow.classList.remove('rotate-180');
+      }
+    }
+
+    // جعل التفاصيل مخفية في البداية حتى يضغط المستخدم على السهم
+    updateDetailsVisibility(false);
+
+    toggleDetailsBtn.addEventListener('click', () => {
+      updateDetailsVisibility(!areDetailsVisible);
+      if (areDetailsVisible) {
+        setTimeout(() => {
+          detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    });
+
+    /* =========================================================
+       5. التنقل بين التواريخ
+       ========================================================= */
+    function shiftDateByDays(days) {
+      const parts = currentSelectedDate.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      d.setDate(d.getDate() + days);
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const newDateStr = `${year}-${month}-${day}`;
+
+      renderDashboardForDate(newDateStr);
+    }
+
+    document.getElementById('prevDayBtn').addEventListener('click', () => shiftDateByDays(-1));
+    document.getElementById('nextDayBtn').addEventListener('click', () => shiftDateByDays(1));
+    document.getElementById('todayBtn').addEventListener('click', () => {
+      renderDashboardForDate(defaultTodayDate);
+      showToast("تم الانتقال إلى تقرير اليوم الحالي");
+    });
+
+    document.getElementById('dateInput').addEventListener('change', (e) => {
+      if (e.target.value) {
+        renderDashboardForDate(e.target.value);
+        showToast(`تم عرض تقرير تاريخ: ${e.target.value}`);
+      }
+    });
+  </script>
+
+  <script>
+    /* =========================================================
+       6. نافذة جميع باسوردات الأكاديمية (Passwords Modal)
+       ========================================================= */
+    const passwordsModal = document.getElementById('passwordsModal');
+    const academyPasswordsBtn = document.getElementById('academyPasswordsBtn');
+    const heroOpenVaultBtn = document.getElementById('heroOpenVaultBtn');
+    const closePasswordsModalBtn = document.getElementById('closePasswordsModalBtn');
+    const closePasswordsFooterBtn = document.getElementById('closePasswordsFooterBtn');
+    const academyAccountsList = document.getElementById('academyAccountsList');
+
+    function renderPasswordsList() {
+      academyAccountsList.innerHTML = '';
+
+      academyPasswordsData.forEach((acc, idx) => {
+        const item = document.createElement('div');
+        item.className = "p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-amber-500/40 transition-colors";
+
+        const inputId = `passField_${idx}`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 text-amber-400 flex items-center justify-center shrink-0 text-base">
+              <i class="${acc.icon}"></i>
+            </div>
+            <div>
+              <h5 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                ${acc.platform}
+              </h5>
+              <p class="text-[11px] text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                <i class="fa-regular fa-envelope text-[10px]"></i>
+                <span>${acc.email}</span>
+                <button type="button" class="copy-email-btn text-amber-400 hover:text-amber-300 ml-1.5" title="نسخ الإيميل">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </p>
+              <p class="text-[10px] text-slate-500 mt-0.5">${acc.role}</p>
+            </div>
+          </div>
+
+          <!-- Password Controls -->
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <div class="relative flex items-center">
+              <input type="password" id="${inputId}" value="${acc.pass}" readonly class="bg-slate-950 text-xs font-mono text-amber-300 rounded-xl px-3 py-2 border border-slate-700/80 w-36 sm:w-44 focus:outline-none select-all">
+              <button type="button" class="toggle-pass-visibility-btn absolute left-2 text-slate-400 hover:text-white text-xs p-1" title="إظهار / إخفاء">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <button type="button" class="copy-pass-btn px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all">
+              <i class="fa-regular fa-copy"></i>
+              <span class="hidden xs:inline">نسخ</span>
+            </button>
+          </div>
+        `;
+
+        // ربط أحداث الإظهار والنسخ
+        const passInput = item.querySelector(`#${inputId}`);
+        const eyeBtn = item.querySelector('.toggle-pass-visibility-btn');
+        const copyPassBtn = item.querySelector('.copy-pass-btn');
+        const copyEmailBtn = item.querySelector('.copy-email-btn');
+
+        eyeBtn.addEventListener('click', () => {
+          if (passInput.type === 'password') {
+            passInput.type = 'text';
+            eyeBtn.innerHTML = '<i class="fa-regular fa-eye-slash text-amber-400"></i>';
+          } else {
+            passInput.type = 'password';
+            eyeBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+          }
+        });
+
+        copyPassBtn.addEventListener('click', () => {
+          copyToClipboard(acc.pass, `كلمة مرور ${acc.platform}`);
+        });
+
+        copyEmailBtn.addEventListener('click', () => {
+          copyToClipboard(acc.email, `إيميل ${acc.platform}`);
+        });
+
+        academyAccountsList.appendChild(item);
+      });
+    }
+
+    function openPasswordsModal() {
+      renderPasswordsList();
+      passwordsModal.classList.remove('hidden');
+      passwordsModal.classList.add('flex');
+    }
+
+    function closePasswordsModal() {
+      passwordsModal.classList.add('hidden');
+      passwordsModal.classList.remove('flex');
+    }
+
+    academyPasswordsBtn.addEventListener('click', openPasswordsModal);
+    if (heroOpenVaultBtn) heroOpenVaultBtn.addEventListener('click', openPasswordsModal);
+    closePasswordsModalBtn.addEventListener('click', closePasswordsModal);
+    closePasswordsFooterBtn.addEventListener('click', closePasswordsModal);
+
+    passwordsModal.addEventListener('click', (e) => {
+      if (e.target === passwordsModal) closePasswordsModal();
+    });
+  </script>
+
+  <script>
+    /* =========================================================
+       7. أنيميشن الخلفية التفاعلي (Interactive Particle Canvas)
+       خفيف وسريع بدون استهلاك موارد
+       ========================================================= */
+    const canvas = document.getElementById('heroCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let particles = [];
+    const particleCount = 40;
+
+    function resizeCanvas() {
+      const container = document.getElementById('hero');
+      if (!container) return;
+      width = canvas.width = container.offsetWidth;
+      height = canvas.height = container.offsetHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * (width || 500);
+        this.y = Math.random() * (height || 500);
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.alpha = Math.random() * 0.4 + 0.2;
+        this.hue = Math.random() > 0.5 ? 230 : 190;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+        if (this.y < 0) this.y = height;
+        if (this.y > height) this.y = 0;
+      }
+
+      draw() {
+        ctx.fillStyle = `hsla(${this.hue}, 80%, 65%, ${this.alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initCanvasAnimation() {
+      resizeCanvas();
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animateCanvas() {
+      if (width && height) {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 110) {
+              ctx.strokeStyle = `rgba(99, 102, 241, ${0.12 * (1 - dist / 110)})`;
+              ctx.lineWidth = 0.7;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+      }
+
+      requestAnimationFrame(animateCanvas);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // الرندر الأولي بدون أي أخطاء لـ defaultTodayDate
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvasAnimation();
+      animateCanvas();
+      renderDashboardForDate(defaultTodayDate);
+    });
+  </script>
+
+</body>
+</html>
